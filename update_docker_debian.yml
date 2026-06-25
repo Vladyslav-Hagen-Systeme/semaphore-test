@@ -4,6 +4,16 @@
   become: true
 
   tasks:
+    - name: Get Debian version before Update
+      command: cat /etc/debian_version
+      register: debian_version_before
+      changed_when: false
+
+    - name: Get Docker version before Update
+      command: docker --version
+      register: docker_version_before
+      changed_when: false
+
     - name: Update apt cache
       apt:
         update_cache: yes
@@ -28,18 +38,22 @@
         name: docker
         state: restarted
 
-    - name: Get Debian version
+    - name: Get Debian version after Update
       command: cat /etc/debian_version
-      register: debian_version
+      register: debian_version_after
       changed_when: false
 
-    - name: Get Docker version
+    - name: Get Docker version after Update
       command: docker --version
-      register: docker_version
+      register: docker_version_after
       changed_when: false
 
     - name: Show versions
       debug:
         msg:
-          - "Debian: {{ debian_version.stdout }}"
-          - "Docker: {{ docker_version.stdout }}"
+          - "Before:"
+          - "Debian: {{ debian_version_before.stdout }}"
+          - "Docker: {{ docker_version_before.stdout }}"
+          - "After:"
+          - "Debian: {{ debian_version_after.stdout }}"
+          - "Docker: {{ docker_version_after.stdout }}"
