@@ -1,0 +1,45 @@
+---
+- name: Update Debian and Docker
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Upgrade all system packages
+      apt:
+        upgrade: dist
+
+    - name: Update Docker packages
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: latest
+
+    - name: Restart Docker
+      service:
+        name: docker
+        state: restarted
+
+    - name: Get Debian version
+      command: cat /etc/debian_version
+      register: debian_version
+      changed_when: false
+
+    - name: Get Docker version
+      command: docker --version
+      register: docker_version
+      changed_when: false
+
+    - name: Show versions
+      debug:
+        msg:
+          - "Debian: {{ debian_version.stdout }}"
+          - "Docker: {{ docker_version.stdout }}"
